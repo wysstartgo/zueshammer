@@ -178,8 +178,8 @@
         /* Feature cards */
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
             margin-top: 4rem;
         }
 
@@ -671,6 +671,22 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🌏</div>
+                    <h3>China LLM Support</h3>
+                    <p>Unified API via chinawhapi.com for DeepSeek, Qwen, GLM, Moonshot, ERNIE, Doubao, MiniMax.</p>
+                    <div class="feature-stats">
+                        <div class="stat">
+                            <div class="stat-value">10+</div>
+                            <div class="stat-label">Models</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">1</div>
+                            <div class="stat-label">API Key</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -936,6 +952,15 @@ cd zueshammer</pre>
                 </div>
                 <div class="start-card">
                     <div class="start-num">2</div>
+                    <h3>Configure</h3>
+                    <p>Set up your API key</p>
+                    <pre># China LLM (Recommended)
+echo "CHINAWHAPI_KEY=your_key" >> ~/.zueshammer/.env
+echo "API_PROVIDER=chinawhapi" >> ~/.zueshammer/.env
+echo "MODEL=deepseek-chat" >> ~/.zueshammer/.env</pre>
+                </div>
+                <div class="start-card">
+                    <div class="start-num">3</div>
                     <h3>Install</h3>
                     <p>Install dependencies</p>
                     <pre>python3 install.py
@@ -944,7 +969,7 @@ cd zueshammer</pre>
 pip install -r requirements.txt</pre>
                 </div>
                 <div class="start-card">
-                    <div class="start-num">3</div>
+                    <div class="start-num">4</div>
                     <h3>Run</h3>
                     <p>Start the agent</p>
                     <pre># Voice mode (recommended!)

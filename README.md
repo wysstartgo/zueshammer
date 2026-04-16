@@ -26,6 +26,32 @@ Unlike typical AI agents, ZuesHammer combines **three breakthrough technologies*
 
 ---
 
+## Supported Models
+
+### 🌏 China LLM via [chinawhapi.com](https://chinawhapi.com)
+
+Unified API access to all major Chinese LLMs with **single key**:
+
+| Provider | Models | Features |
+|----------|--------|----------|
+| **DeepSeek** | V3, Coder | Best value, coding focused |
+| **Qwen** (Alibaba) | Turbo, Plus, Max | Long context support |
+| **GLM** (Zhipu) | GLM-4, GLM-4V | Vision support |
+| **Moonshot** | 8K, 32K, 128K | Ultra long context |
+| **ERNIE** (Baidu) | Bot 4.0, Bot Long | Enterprise grade |
+| **Doubao** (ByteDance) | Pro, Lite | Fast, cost effective |
+| **MiniMax** | ABAB6 Chat/GSPT | Conversational AI |
+
+### 🤖 International Models
+
+| Provider | Models |
+|----------|--------|
+| **Anthropic** | Claude 3.5 Sonnet, Opus, Haiku |
+| **OpenAI** | GPT-4o, GPT-4 Turbo, GPT-3.5 |
+| **Local** | Ollama, LM Studio, vLLM |
+
+---
+
 ## Key Features
 
 ### 🧠 Local Brain - Think Before Asking LLM
@@ -35,7 +61,7 @@ The core innovation that sets ZuesHammer apart:
 ```python
 # ZuesHammer's Local Brain workflow:
 # 1. User gives instruction
-# 2. Local Brain receives instruction  
+# 2. Local Brain receives instruction
 # 3. Pattern matching against skill library
 # 4. Match found → Execute skill directly (NO LLM needed!)
 # 5. No match → Call LLM for solution
@@ -77,12 +103,6 @@ Inspired by ClaudeCode, Hermes, and OpenClaw best practices:
 | **Long-term** | SQLite | Persistent knowledge | Forever |
 | **Working** | Active context | Current task state | Session |
 
-Features:
-- LRU eviction with importance weighting
-- Vector similarity search (simplified)
-- Automatic importance scoring
-- Event-driven updates
-
 ---
 
 ## Quick Start
@@ -95,14 +115,69 @@ cd zueshammer
 # Install
 python3 install.py
 
-# Configure
-echo "ANTHROPIC_API_KEY=sk-ant-xxx" >> ~/.zueshammer/.env
-echo "PERMISSION_LEVEL=semi_open" >> ~/.zueshammer/.env
+# Configure - Choose your preferred API provider
+```
 
-# Run
+### Option 1: China LLM (Recommended for Chinese users)
+
+```bash
+# Get your API key from https://chinawhapi.com
+echo "CHINAWHAPI_KEY=your_key_here" >> ~/.zueshammer/.env
+echo "API_PROVIDER=chinawhapi" >> ~/.zueshammer/.env
+echo "MODEL=deepseek-chat" >> ~/.zueshammer/.env
+```
+
+### Option 2: Anthropic Claude
+
+```bash
+echo "ANTHROPIC_API_KEY=sk-ant-xxx" >> ~/.zueshammer/.env
+echo "API_PROVIDER=anthropic" >> ~/.zueshammer/.env
+echo "MODEL=claude-3-5-sonnet-20241022" >> ~/.zueshammer/.env
+```
+
+### Option 3: OpenAI
+
+```bash
+echo "OPENAI_API_KEY=sk-xxx" >> ~/.zueshammer/.env
+echo "API_PROVIDER=openai" >> ~/.zueshammer/.env
+echo "MODEL=gpt-4o" >> ~/.zueshammer/.env
+```
+
+### Run
+
+```bash
 python3 -m src.main --mode cli   # CLI
 python3 -m src.main --mode web   # Web UI
 python3 -m src.main --mode voice # Voice (recommended!)
+```
+
+---
+
+## API Configuration
+
+### chinawhapi.com (中国大模型)
+
+```bash
+# From https://chinawhapi.com/console
+CHINAWHAPI_KEY=your_unified_key
+API_PROVIDER=chinawhapi
+MODEL=deepseek-chat  # or qwen-plus, glm-4, moonshot-v1-32k, etc.
+```
+
+### Anthropic
+
+```bash
+ANTHROPIC_API_KEY=sk-ant-your-key
+API_PROVIDER=anthropic
+MODEL=claude-3-5-sonnet-20241022
+```
+
+### OpenAI
+
+```bash
+OPENAI_API_KEY=sk-your-key
+API_PROVIDER=openai
+MODEL=gpt-4o
 ```
 
 ---
@@ -113,20 +188,20 @@ python3 -m src.main --mode voice # Voice (recommended!)
 ┌─────────────────────────────────────────────────────────┐
 │                    ZuesHammer                           │
 ├─────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐     │
-│  │ Local Brain │  │Voice System│  │Memory System│     │
-│  │             │  │             │  │             │     │
-│  │ Intent Recog│  │Whisper STT  │  │ Short-term  │     │
-│  │ Skill Match │  │ Edge TTS    │  │ Long-term   │     │
-│  │ Auto Learn  │  │ Wake Word   │  │ Working     │     │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘     │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐   │
+│  │ Local Brain │  │Voice System│  │Memory System│   │
+│  │             │  │             │  │             │   │
+│  │ Intent Recog│  │Whisper STT  │  │ Short-term  │   │
+│  │ Skill Match │  │ Edge TTS    │  │ Long-term   │   │
+│  │ Auto Learn  │  │ Wake Word   │  │ Working     │   │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘   │
 │         │                │                │             │
-│  ┌──────┴────────────────┴────────────────┴──────┐     │
-│  │              Core Engine                       │     │
-│  │  Permission • Event Bus • Pipeline            │     │
-│  └───────────────────────────────────────────────┘     │
+│  ┌──────┴────────────────┴────────────────┴──────┐   │
+│  │              Core Engine                       │   │
+│  │  Permission • Event Bus • Pipeline            │   │
+│  └───────────────────────────────────────────────┘   │
 ├─────────────────────────────────────────────────────────┤
-│  Tools: Claude Core • MCP Protocol • Browser • Skills    │
+│  LLM Providers: ChinaWhapi • Anthropic • OpenAI • Local │
 └─────────────────────────────────────────────────────────┘
 ```
 

@@ -37,6 +37,9 @@ class Config:
     api_provider: str = "anthropic"  # anthropic, openai, local, chinawhapi
     api_key: str = ""
     api_base: str = "https://api.anthropic.com"
+    # China LLM (chinawhapi.com)
+    chinawhapi_key: str = ""
+    chinawhapi_base: str = "https://api.chinawhapi.com/v1"
     model: str = "claude-3-5-sonnet-20241022"
     max_tokens: int = 8192
     temperature: float = 0.7
@@ -117,6 +120,10 @@ class Config:
             "ANTHROPIC_API_KEY": "api_key",
             "ZUESHAMMER_API_BASE": "api_base",
             "ZUESHAMMER_MODEL": "model",
+            "API_PROVIDER": "api_provider",
+
+            # China LLM (chinawhapi.com)
+            "CHINAWHAPI_KEY": "chinawhapi_key",
 
             # Permission
             "ZUESHAMMER_PERMISSION": "permission_level",

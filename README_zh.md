@@ -26,6 +26,32 @@
 
 ---
 
+## 支持的模型
+
+### 🌏 通过 [chinawhapi.com](https://chinawhapi.com) 接入中国大模型
+
+使用单一 API Key 统一接入所有主流中国大模型：
+
+| 供应商 | 模型 | 特点 |
+|----------|--------|----------|
+| **DeepSeek** | V3, Coder | 性价比最高，编程能力强 |
+| **通义千问** (阿里) | Turbo, Plus, Max | 超长上下文支持 |
+| **智谱GLM** | GLM-4, GLM-4V | 支持视觉 |
+| **月之暗面** | 8K, 32K, 128K | 超长上下文 |
+| **文心一言** (百度) | Bot 4.0, Bot Long | 企业级可靠性 |
+| **豆包** (字节) | Pro, Lite | 快速、成本效益高 |
+| **MiniMax** | ABAB6 Chat/GSPT | 对话AI |
+
+### 🤖 国际模型
+
+| 供应商 | 模型 |
+|----------|--------|
+| **Anthropic** | Claude 3.5 Sonnet, Opus, Haiku |
+| **OpenAI** | GPT-4o, GPT-4 Turbo, GPT-3.5 |
+| **本地模型** | Ollama, LM Studio, vLLM |
+
+---
+
 ## 核心特性
 
 ### 🧠 本地大脑 - 先思考，再调用LLM
@@ -77,12 +103,6 @@ python3 -m src.main --mode voice
 | **长期记忆** | SQLite | 持久化知识 | 永久 |
 | **工作记忆** | 活跃上下文 | 当前任务状态 | 会话期间 |
 
-特性：
-- 基于重要性的LRU淘汰策略
-- 向量相似度搜索
-- 自动重要性评分
-- 事件驱动更新
-
 ---
 
 ## 快速开始
@@ -95,14 +115,69 @@ cd zueshammer
 # 安装
 python3 install.py
 
-# 配置
-echo "ANTHROPIC_API_KEY=sk-ant-xxx" >> ~/.zueshammer/.env
-echo "PERMISSION_LEVEL=semi_open" >> ~/.zueshammer/.env
+# 配置 - 选择你喜欢的API供应商
+```
 
-# 运行
+### 方式一：中国大模型（推荐中国用户）
+
+```bash
+# 从 https://chinawhapi.com 获取API密钥
+echo "CHINAWHAPI_KEY=你的密钥" >> ~/.zueshammer/.env
+echo "API_PROVIDER=chinawhapi" >> ~/.zueshammer/.env
+echo "MODEL=deepseek-chat" >> ~/.zueshammer/.env
+```
+
+### 方式二：Anthropic Claude
+
+```bash
+echo "ANTHROPIC_API_KEY=sk-ant-xxx" >> ~/.zueshammer/.env
+echo "API_PROVIDER=anthropic" >> ~/.zueshammer/.env
+echo "MODEL=claude-3-5-sonnet-20241022" >> ~/.zueshammer/.env
+```
+
+### 方式三：OpenAI
+
+```bash
+echo "OPENAI_API_KEY=sk-xxx" >> ~/.zueshammer/.env
+echo "API_PROVIDER=openai" >> ~/.zueshammer/.env
+echo "MODEL=gpt-4o" >> ~/.zueshammer/.env
+```
+
+### 运行
+
+```bash
 python3 -m src.main --mode cli   # 命令行
 python3 -m src.main --mode web   # 网页界面
 python3 -m src.main --mode voice # 语音模式（推荐！）
+```
+
+---
+
+## API配置
+
+### chinawhapi.com（中国大模型）
+
+```bash
+# 从 https://chinawhapi.com/console 获取
+CHINAWHAPI_KEY=你的统一密钥
+API_PROVIDER=chinawhapi
+MODEL=deepseek-chat  # 可选: qwen-plus, glm-4, moonshot-v1-32k 等
+```
+
+### Anthropic
+
+```bash
+ANTHROPIC_API_KEY=sk-ant-your-key
+API_PROVIDER=anthropic
+MODEL=claude-3-5-sonnet-20241022
+```
+
+### OpenAI
+
+```bash
+OPENAI_API_KEY=sk-your-key
+API_PROVIDER=openai
+MODEL=gpt-4o
 ```
 
 ---
@@ -113,20 +188,20 @@ python3 -m src.main --mode voice # 语音模式（推荐！）
 ┌─────────────────────────────────────────────────────────┐
 │                    ZuesHammer                           │
 ├─────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐     │
-│  │  本地大脑   │  │  语音系统   │  │  记忆系统   │     │
-│  │             │  │             │  │             │     │
-│  │ 意图识别   │  │ Whisper STT │  │ 短期记忆   │     │
-│  │ 技能匹配   │  │ Edge TTS    │  │ 长期记忆   │     │
-│  │ 自动学习   │  │ 唤醒词检测   │  │ 工作记忆   │     │
-│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘     │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐   │
+│  │  本地大脑   │  │  语音系统   │  │  记忆系统   │   │
+│  │             │  │             │  │             │   │
+│  │ 意图识别   │  │ Whisper STT │  │ 短期记忆   │   │
+│  │ 技能匹配   │  │ Edge TTS    │  │ 长期记忆   │   │
+│  │ 自动学习   │  │ 唤醒词检测   │  │ 工作记忆   │   │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘   │
 │         │                │                │             │
-│  ┌──────┴────────────────┴────────────────┴──────┐     │
-│  │              核心引擎                          │     │
-│  │  权限管理 • 事件总线 • 任务管道               │     │
-│  └───────────────────────────────────────────────┘     │
+│  ┌──────┴────────────────┴────────────────┴──────┐   │
+│  │              核心引擎                          │   │
+│  │  权限管理 • 事件总线 • 任务管道               │   │
+│  └───────────────────────────────────────────────┘   │
 ├─────────────────────────────────────────────────────────┤
-│  工具集: Claude Core • MCP协议 • 浏览器 • 技能系统        │
+│  LLM供应商: ChinaWhapi • Anthropic • OpenAI • 本地模型  │
 └─────────────────────────────────────────────────────────┘
 ```
 
