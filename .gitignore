@@ -1,0 +1,10 @@
+# ZuesHammer
+*.pyc
+__pycache__/
+*.egg-info/
+.env
+.git/
+node_modules/
+.vscode/
+.DS_Store
+*.log
