@@ -1,23 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZuesHammer - AI Agent with Local Brain & Voice</title>
+    <meta name="description" content="The intelligent AI agent with local brain, voice interaction, and three-tier memory.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-dark: #0a0a0f;
-            --bg-card: rgba(20, 20, 30, 0.8);
+            --bg-card: rgba(20, 20, 30, 0.9);
             --accent-cyan: #00d4ff;
             --accent-purple: #a855f7;
             --accent-pink: #ec4899;
             --accent-green: #10b981;
             --text-primary: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.6);
+            --text-secondary: rgba(255, 255, 255, 0.7);
             --text-dim: rgba(255, 255, 255, 0.4);
+            --border-subtle: rgba(255, 255, 255, 0.08);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -25,7 +27,7 @@
         html { scroll-behavior: smooth; }
 
         body {
-            font-family: 'Sora', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-dark);
             color: var(--text-primary);
             line-height: 1.6;
@@ -37,10 +39,10 @@
             position: fixed;
             top: 0;
             width: 100%;
-            padding: 1.2rem 3rem;
-            background: rgba(10, 10, 15, 0.9);
+            padding: 1rem 2rem;
+            background: rgba(10, 10, 15, 0.95);
             backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid var(--border-subtle);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -48,15 +50,14 @@
         }
 
         .logo {
-            font-family: 'Space Mono', monospace;
-            font-size: 1.3rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.2rem;
             font-weight: 700;
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--accent-cyan);
+            text-decoration: none;
         }
 
-        .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
         .nav-links a {
             color: var(--text-secondary);
             text-decoration: none;
@@ -76,25 +77,14 @@
             text-align: center;
             padding: 8rem 2rem 4rem;
             position: relative;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 20%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 800px;
-            height: 800px;
-            background: radial-gradient(circle, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
-            pointer-events: none;
+            background: radial-gradient(ellipse at 50% 30%, rgba(0, 212, 255, 0.08) 0%, transparent 60%);
         }
 
         .hero-badge {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.6rem 1.2rem;
+            padding: 0.5rem 1rem;
             background: rgba(0, 212, 255, 0.1);
             border: 1px solid rgba(0, 212, 255, 0.3);
             border-radius: 50px;
@@ -104,16 +94,14 @@
         }
 
         .hero h1 {
-            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-size: clamp(3rem, 10vw, 6rem);
             font-weight: 700;
-            line-height: 1.1;
+            line-height: 1.05;
             margin-bottom: 1.5rem;
-        }
-
-        .hero h1 .gradient {
             background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple), var(--accent-pink));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .hero-subtitle {
@@ -126,489 +114,243 @@
         .hero-cta {
             display: flex;
             gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .btn {
-            padding: 1rem 2rem;
-            border-radius: 12px;
+            padding: 0.9rem 2rem;
+            border-radius: 10px;
             font-weight: 600;
             text-decoration: none;
             transition: all 0.3s;
+            font-size: 0.95rem;
         }
 
         .btn-primary {
             background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
             color: var(--bg-dark);
         }
-        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 40px rgba(0, 212, 255, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0, 212, 255, 0.3); }
 
         .btn-secondary {
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-subtle);
             color: var(--text-primary);
         }
-        .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-3px); }
+        .btn-secondary:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-2px); }
 
-        /* Section base */
-        section { padding: 6rem 2rem; }
-
-        .container { max-width: 1200px; margin: 0 auto; }
+        /* Sections */
+        section { padding: 5rem 2rem; }
+        .container { max-width: 1100px; margin: 0 auto; }
 
         .section-label {
-            font-family: 'Space Mono', monospace;
-            font-size: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
             color: var(--accent-cyan);
             text-transform: uppercase;
             letter-spacing: 3px;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
 
         .section-title {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 700;
             margin-bottom: 1rem;
         }
 
         .section-desc {
             color: var(--text-secondary);
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             max-width: 600px;
         }
 
-        /* Feature cards */
+        /* Feature Cards */
         .features-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 1.5rem;
-            margin-top: 4rem;
+            margin-top: 3rem;
         }
 
         .feature-card {
             background: var(--bg-card);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 24px;
-            padding: 2.5rem;
-            transition: all 0.4s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple));
-            transform: scaleX(0);
-            transition: transform 0.4s;
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.3s;
         }
 
         .feature-card:hover {
-            transform: translateY(-8px);
-            border-color: rgba(0, 212, 255, 0.2);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            transform: translateY(-5px);
+            border-color: rgba(0, 212, 255, 0.3);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
         }
 
-        .feature-card:hover::before { transform: scaleX(1); }
-
         .feature-icon {
-            width: 64px;
-            height: 64px;
-            border-radius: 16px;
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            margin-bottom: 1.25rem;
         }
 
         .feature-card:nth-child(1) .feature-icon { background: rgba(0, 212, 255, 0.15); }
         .feature-card:nth-child(2) .feature-icon { background: rgba(168, 85, 247, 0.15); }
         .feature-card:nth-child(3) .feature-icon { background: rgba(236, 72, 153, 0.15); }
+        .feature-card:nth-child(4) .feature-icon { background: rgba(16, 185, 129, 0.15); }
 
         .feature-card h3 {
-            font-size: 1.4rem;
+            font-size: 1.25rem;
             font-weight: 600;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
 
         .feature-card p {
             color: var(--text-secondary);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             line-height: 1.7;
         }
 
-        .feature-stats {
-            display: flex;
-            gap: 1.5rem;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .stat { text-align: center; }
-        .stat-value {
-            font-family: 'Space Mono', monospace;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent-cyan);
-        }
-        .stat-label {
-            font-size: 0.8rem;
-            color: var(--text-dim);
-        }
-
-        /* Local Brain Section */
-        .brain-section {
-            background: linear-gradient(180deg, transparent, rgba(0, 212, 255, 0.02), transparent);
-            padding: 8rem 2rem;
-        }
-
-        .brain-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            align-items: center;
-        }
-
-        .brain-flow {
-            background: var(--bg-card);
-            border: 1px solid rgba(0, 212, 255, 0.1);
-            border-radius: 24px;
-            padding: 2rem;
-        }
-
-        .flow-step {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            padding: 1rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .flow-step:last-child { border-bottom: none; }
-
-        .flow-num {
-            width: 32px;
-            height: 32px;
-            min-width: 32px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Space Mono', monospace;
-            font-size: 0.85rem;
-            font-weight: 700;
-        }
-
-        .flow-text { font-size: 0.95rem; }
-        .flow-text strong { color: var(--accent-cyan); }
-
-        .flow-highlight {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-top: 1rem;
-            font-size: 0.9rem;
-        }
-
-        .flow-highlight strong { color: var(--accent-green); }
-
-        /* Voice Section */
-        .voice-section { padding: 8rem 2rem; }
-
-        .voice-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            margin-top: 4rem;
-        }
-
-        .voice-card {
-            background: var(--bg-card);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 2rem;
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .voice-card:hover {
-            border-color: rgba(168, 85, 247, 0.3);
-            transform: translateY(-5px);
-        }
-
-        .voice-emoji {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .voice-card h4 {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .voice-card p {
-            font-size: 0.85rem;
-            color: var(--text-dim);
-        }
-
-        /* Memory Architecture */
-        .memory-section {
-            background: var(--bg-card);
-            padding: 8rem 2rem;
-        }
-
-        .memory-layers {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            margin-top: 4rem;
-        }
-
-        .memory-layer {
-            border-radius: 24px;
-            padding: 2.5rem;
-            position: relative;
-        }
-
-        .memory-layer:nth-child(1) {
-            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 212, 255, 0.02));
-            border: 1px solid rgba(0, 212, 255, 0.2);
-        }
-
-        .memory-layer:nth-child(2) {
-            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(168, 85, 247, 0.02));
-            border: 1px solid rgba(168, 85, 247, 0.2);
-        }
-
-        .memory-layer:nth-child(3) {
-            background: linear-gradient(135deg, rgba(236, 72, 153, 0.1), rgba(236, 72, 153, 0.02));
-            border: 1px solid rgba(236, 72, 153, 0.2);
-        }
-
-        .layer-label {
-            font-family: 'Space Mono', monospace;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 0.5rem;
-        }
-
-        .memory-layer:nth-child(1) .layer-label { color: var(--accent-cyan); }
-        .memory-layer:nth-child(2) .layer-label { color: var(--accent-purple); }
-        .memory-layer:nth-child(3) .layer-label { color: var(--accent-pink); }
-
-        .memory-layer h3 {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .memory-layer p {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .layer-specs {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .spec {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-        }
-
-        .spec-label { color: var(--text-dim); }
-        .spec-value { color: var(--text-secondary); font-family: 'Space Mono', monospace; }
-
-        /* Code Example */
-        .code-section { padding: 8rem 2rem; }
-
-        .code-block {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            border-radius: 20px;
-            overflow: hidden;
-            max-width: 800px;
-            margin: 3rem auto 0;
-        }
-
-        .code-header {
-            background: rgba(0, 212, 255, 0.05);
-            padding: 1rem 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
-        }
-
-        .code-dot { width: 12px; height: 12px; border-radius: 50%; }
-        .code-dot.red { background: #ff5f57; }
-        .code-dot.yellow { background: #febc2e; }
-        .code-dot.green { background: #28c840; }
-
-        .code-content { padding: 2rem; overflow-x: auto; }
-
-        .code-content pre {
-            margin: 0;
-            font-family: 'Space Mono', monospace;
-            font-size: 0.85rem;
-            line-height: 1.8;
-        }
-
-        .code-content .keyword { color: var(--accent-purple); }
-        .code-content .string { color: #fbbf24; }
-        .code-content .comment { color: var(--text-dim); }
-        .code-content .function { color: var(--accent-cyan); }
-        .code-content .variable { color: var(--accent-pink); }
-
-        /* Quick Start */
+        /* Quick Start Section */
         .start-section {
-            background: linear-gradient(180deg, transparent, rgba(168, 85, 247, 0.02), transparent);
-            padding: 8rem 2rem;
+            background: linear-gradient(180deg, transparent, rgba(168, 85, 247, 0.03), transparent);
+            padding: 6rem 2rem;
         }
 
         .start-steps {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            margin-top: 4rem;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
         }
 
         .start-card {
             background: var(--bg-card);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 24px;
-            padding: 2rem;
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 1.75rem;
             text-align: center;
             position: relative;
         }
 
         .start-num {
             position: absolute;
-            top: -1rem;
+            top: -0.75rem;
             left: 50%;
             transform: translateX(-50%);
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Space Mono', monospace;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
             font-weight: 700;
         }
 
         .start-card h3 {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             margin: 1rem 0 0.5rem;
         }
 
         .start-card p {
             color: var(--text-secondary);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             margin-bottom: 1rem;
         }
 
         .start-card pre {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.4);
             padding: 1rem;
-            border-radius: 12px;
-            font-family: 'Space Mono', monospace;
-            font-size: 0.8rem;
+            border-radius: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
             text-align: left;
             overflow-x: auto;
+            line-height: 1.6;
         }
+
+        /* Install Command */
+        .install-section {
+            padding: 6rem 2rem;
+            text-align: center;
+        }
+
+        .install-box {
+            background: var(--bg-card);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .install-box h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .install-box .desc {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .install-cmd {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1.5rem 2rem;
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            text-align: left;
+            overflow-x: auto;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .install-cmd .prompt { color: var(--accent-green); }
+        .install-cmd .cmd { color: var(--accent-cyan); }
 
         /* Footer */
         footer {
             background: var(--bg-card);
-            padding: 4rem 2rem 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: 4rem;
-        }
-
-        .footer-brand h3 {
-            font-family: 'Space Mono', monospace;
-            font-size: 1.3rem;
-            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 1rem;
-        }
-
-        .footer-brand p {
-            color: var(--text-secondary);
-            max-width: 300px;
-        }
-
-        .footer-links h4 {
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-            color: var(--accent-cyan);
-        }
-
-        .footer-links ul { list-style: none; }
-        .footer-links li { margin-bottom: 0.5rem; }
-        .footer-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.3s;
-        }
-        .footer-links a:hover { color: var(--accent-cyan); }
-
-        .footer-bottom {
-            max-width: 1200px;
-            margin: 3rem auto 0;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--border-subtle);
             text-align: center;
+        }
+
+        footer p {
             color: var(--text-dim);
             font-size: 0.85rem;
         }
 
         /* Responsive */
-        @media (max-width: 900px) {
+        @media (max-width: 768px) {
             .nav-links { display: none; }
-            .features-grid, .voice-grid, .memory-layers, .start-steps { grid-template-columns: 1fr; }
-            .brain-content { grid-template-columns: 1fr; }
-            .footer-content { grid-template-columns: 1fr; gap: 2rem; }
+            .hero h1 { font-size: 2.5rem; }
+            section { padding: 4rem 1.5rem; }
         }
     </style>
 </head>
 <body>
     <nav>
-        <div class="logo">ZH</div>
+        <a href="#" class="logo">ZuesHammer</a>
         <ul class="nav-links">
             <li><a href="#features">Features</a></li>
-            <li><a href="#brain">Local Brain</a></li>
-            <li><a href="#voice">Voice</a></li>
-            <li><a href="#memory">Memory</a></li>
-            <li><a href="https://github.com/pengrambo3-tech/zueshammer">GitHub</a></li>
+            <li><a href="#start">Quick Start</a></li>
+            <li><a href="#install">Install</a></li>
+            <li><a href="https://github.com/pengrambo3-tech/zueshammer" target="_blank">GitHub</a></li>
         </ul>
     </nav>
 
     <section class="hero">
         <div class="hero-badge">v2.0.0 - Now Available</div>
-        <h1><span class="gradient">ZuesHammer</span></h1>
-        <p class="hero-subtitle">The AI Agent with Local Brain & Voice Interaction. Think locally, speak freely, remember everything.</p>
+        <h1>ZuesHammer</h1>
+        <p class="hero-subtitle">The AI Agent with Local Brain & Voice. Think locally, speak freely, remember everything.</p>
         <div class="hero-cta">
             <a href="https://github.com/pengrambo3-tech/zueshammer" class="btn btn-primary">Get Started</a>
             <a href="#features" class="btn btn-secondary">Learn More</a>
@@ -618,347 +360,64 @@
     <section id="features">
         <div class="container">
             <div style="text-align: center;">
-                <div class="section-label">What Makes Us Different</div>
+                <div class="section-label">Core Features</div>
                 <h2 class="section-title">Three Breakthrough Technologies</h2>
-                <p class="section-desc">Unlike typical AI agents, ZuesHammer combines unique technologies that make it smarter, faster, and more efficient.</p>
+                <p class="section-desc" style="margin: 0 auto;">Unlike typical AI agents, ZuesHammer combines unique technologies that make it smarter, faster, and more efficient.</p>
             </div>
 
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="feature-icon">🧠</div>
+                    <div class="feature-icon">&#x1F9E0;</div>
                     <h3>Local Brain</h3>
-                    <p>Intent recognition & pattern matching that learns new skills automatically. 80% of common tasks run instantly without calling LLM.</p>
-                    <div class="feature-stats">
-                        <div class="stat">
-                            <div class="stat-value">80%</div>
-                            <div class="stat-label">Faster</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value">∞</div>
-                            <div class="stat-label">Self-learning</div>
-                        </div>
-                    </div>
+                    <p>Intent recognition and pattern matching that learns new skills automatically. 80% of common tasks run instantly without calling LLM.</p>
                 </div>
 
                 <div class="feature-card">
-                    <div class="feature-icon">🎙️</div>
+                    <div class="feature-icon">&#x1F3A4;</div>
                     <h3>Voice-First</h3>
                     <p>Local Whisper STT + Edge TTS for true hands-free operation. No data sent to cloud - fully offline capable.</p>
-                    <div class="feature-stats">
-                        <div class="stat">
-                            <div class="stat-value">100%</div>
-                            <div class="stat-label">Local</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value">0</div>
-                            <div class="stat-label">Data Sent</div>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="feature-card">
-                    <div class="feature-icon">🧬</div>
+                    <div class="feature-icon">&#x1F9EC;</div>
                     <h3>Three-Tier Memory</h3>
                     <p>Short-term (LRU cache) + Long-term (SQLite) + Working memory. Never forget important context.</p>
-                    <div class="feature-stats">
-                        <div class="stat">
-                            <div class="stat-value">3</div>
-                            <div class="stat-label">Layers</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value">24/7</div>
-                            <div class="stat-label">Persistence</div>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="feature-card">
-                    <div class="feature-icon">🌏</div>
+                    <div class="feature-icon">&#x1F30F;</div>
                     <h3>China LLM Support</h3>
                     <p>Unified API via chinawhapi.com for DeepSeek, Qwen, GLM, Moonshot, ERNIE, Doubao, MiniMax.</p>
-                    <div class="feature-stats">
-                        <div class="stat">
-                            <div class="stat-value">10+</div>
-                            <div class="stat-label">Models</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value">1</div>
-                            <div class="stat-label">API Key</div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="brain" class="brain-section">
-        <div class="container">
-            <div class="brain-content">
-                <div>
-                    <div class="section-label">Core Innovation</div>
-                    <h2 class="section-title">Local Brain</h2>
-                    <p class="section-desc">Think Before Asking LLM. The Local Brain analyzes user intent and matches against learned patterns - executing skills directly without waiting for LLM response.</p>
-                    
-                    <div class="brain-flow" style="margin-top: 2rem;">
-                        <div class="flow-step">
-                            <div class="flow-num">1</div>
-                            <div class="flow-text">User gives instruction</div>
-                        </div>
-                        <div class="flow-step">
-                            <div class="flow-num">2</div>
-                            <div class="flow-text"><strong>Pattern matching</strong> against skill library</div>
-                        </div>
-                        <div class="flow-step">
-                            <div class="flow-num">3</div>
-                            <div class="flow-text"><strong>Match found?</strong> Execute directly</div>
-                        </div>
-                        <div class="flow-step">
-                            <div class="flow-num">4</div>
-                            <div class="flow-text">No match? Call LLM for solution</div>
-                        </div>
-                        <div class="flow-step">
-                            <div class="flow-num">5</div>
-                            <div class="flow-text">Work complete → <strong>Learn new skill</strong></div>
-                        </div>
-                        <div class="flow-step">
-                            <div class="flow-num">6</div>
-                            <div class="flow-text">Next time → Use learned skill instantly</div>
-                        </div>
-                        
-                        <div class="flow-highlight">
-                            <strong>Result:</strong> 80% faster for common tasks. Self-improving. Privacy-first.
-                        </div>
-                    </div>
-                </div>
-                
-                <div>
-                    <div style="background: var(--bg-card); border: 1px solid rgba(0, 212, 255, 0.1); border-radius: 24px; padding: 2rem;">
-                        <h4 style="margin-bottom: 1rem; color: var(--accent-cyan);">Intent Recognition</h4>
-                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                            <span style="background: rgba(0, 212, 255, 0.1); padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.8rem;">file_read</span>
-                            <span style="background: rgba(0, 212, 255, 0.1); padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.8rem;">file_write</span>
-                            <span style="background: rgba(0, 212, 255, 0.1); padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.8rem;">command_exec</span>
-                            <span style="background: rgba(0, 212, 255, 0.1); padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.8rem;">web_search</span>
-                            <span style="background: rgba(0, 212, 255, 0.1); padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.8rem;">web_browse</span>
-                            <span style="background: rgba(168, 85, 247, 0.1); padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.8rem;">code</span>
-                            <span style="background: rgba(168, 85, 247, 0.1); padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.8rem;">question</span>
-                            <span style="background: rgba(168, 85, 247, 0.1); padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.8rem;">task</span>
-                        </div>
-                        
-                        <h4 style="margin: 1.5rem 0 1rem; color: var(--accent-purple);">Skill Learning</h4>
-                        <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.8;">
-                            After each LLM task, the Local Brain evaluates if it's worth learning. Simple tasks are skipped; complex ones are converted into reusable skills for instant execution next time.
-                        </p>
-                        
-                        <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(0, 0, 0, 0.3); border-radius: 12px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                <span style="color: var(--text-dim); font-size: 0.85rem;">Built-in Skills</span>
-                                <span style="color: var(--accent-cyan); font-family: 'Space Mono';">50+</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between;">
-                                <span style="color: var(--text-dim); font-size: 0.85rem;">Learned Skills</span>
-                                <span style="color: var(--accent-green); font-family: 'Space Mono';">∞</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="voice" class="voice-section">
-        <div class="container" style="text-align: center;">
-            <div class="section-label">Hands-Free Operation</div>
-            <h2 class="section-title">Voice Interaction</h2>
-            <p class="section-desc" style="margin: 0 auto;">Complete voice pipeline running locally. No cloud dependency, full privacy protection.</p>
-
-            <div class="voice-grid">
-                <div class="voice-card">
-                    <div class="voice-emoji">🎤</div>
-                    <h4>Whisper STT</h4>
-                    <p>Local speech recognition. Works offline.</p>
-                </div>
-                <div class="voice-card">
-                    <div class="voice-emoji">🔊</div>
-                    <h4>Edge TTS</h4>
-                    <p>Natural voice synthesis. Free & high quality.</p>
-                </div>
-                <div class="voice-card">
-                    <div class="voice-emoji">👋</div>
-                    <h4>Wake Word</h4>
-                    <p>"Hey Agent" activation. Always listening.</p>
-                </div>
-                <div class="voice-card">
-                    <div class="voice-emoji">🌐</div>
-                    <h4>Multi-Language</h4>
-                    <p>Auto-detect Chinese/English/Japanese.</p>
-                </div>
-            </div>
-
-            <div class="code-block" style="margin-top: 4rem; text-align: left;">
-                <div class="code-header">
-                    <span class="code-dot red"></span>
-                    <span class="code-dot yellow"></span>
-                    <span class="code-dot green"></span>
-                    <span style="margin-left: 1rem; font-family: 'Space Mono'; font-size: 0.85rem; color: var(--text-dim);">terminal</span>
-                </div>
-                <div class="code-content">
-                    <pre><span class="comment"># Start voice mode</span>
-$ python3 -m src.main <span class="variable">--mode voice</span>
-
-<span class="comment"># Say this:</span>
-<span class="string">"帮我读取 /tmp/test.txt"</span>
-<span class="string">"search for Python tutorials"</span>
-<span class="string">"运行 git status"</span>
-
-<span class="comment"># Get instant response with synthesized voice</span></pre>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="memory" class="memory-section">
-        <div class="container" style="text-align: center;">
-            <div class="section-label">Never Forget</div>
-            <h2 class="section-title">Three-Tier Memory System</h2>
-            <p class="section-desc" style="margin: 0 auto;">Inspired by ClaudeCode, Hermes, and OpenClaw best practices. Intelligent data placement.</p>
-
-            <div class="memory-layers">
-                <div class="memory-layer">
-                    <div class="layer-label">Layer 1</div>
-                    <h3>Short-Term</h3>
-                    <p>LRU cache in RAM. Instant access for hot data.</p>
-                    <div class="layer-specs">
-                        <div class="spec">
-                            <span class="spec-label">Storage</span>
-                            <span class="spec-value">RAM (OrderedDict)</span>
-                        </div>
-                        <div class="spec">
-                            <span class="spec-label">Capacity</span>
-                            <span class="spec-value">100 items</span>
-                        </div>
-                        <div class="spec">
-                            <span class="spec-label">Duration</span>
-                            <span class="spec-value">~1 hour</span>
-                        </div>
-                        <div class="spec">
-                            <span class="spec-label">Algorithm</span>
-                            <span class="spec-value">LRU + Importance</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="memory-layer">
-                    <div class="layer-label">Layer 2</div>
-                    <h3>Long-Term</h3>
-                    <p>SQLite persistence. Your knowledge, forever.</p>
-                    <div class="layer-specs">
-                        <div class="spec">
-                            <span class="spec-label">Storage</span>
-                            <span class="spec-value">SQLite</span>
-                        </div>
-                        <div class="spec">
-                            <span class="spec-label">Capacity</span>
-                            <span class="spec-value">Unlimited</span>
-                        </div>
-                        <div class="spec">
-                            <span class="spec-label">Duration</span>
-                            <span class="spec-value">Permanent</span>
-                        </div>
-                        <div class="spec">
-                            <span class="spec-label">Features</span>
-                            <span class="spec-value">Vector Search</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="memory-layer">
-                    <div class="layer-label">Layer 3</div>
-                    <h3>Working</h3>
-                    <p>Active context. Current task state in memory.</p>
-                    <div class="layer-specs">
-                        <div class="spec">
-                            <span class="spec-label">Storage</span>
-                            <span class="spec-value">In-Context</span>
-                        </div>
-                        <div class="spec">
-                            <span class="spec-label">Capacity</span>
-                            <span class="spec-value">200k tokens</span>
-                        </div>
-                        <div class="spec">
-                            <span class="spec-label">Duration</span>
-                            <span class="spec-value">Session</span>
-                        </div>
-                        <div class="spec">
-                            <span class="spec-label">Purpose</span>
-                            <span class="spec-value">Current Task</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="code-section">
-        <div class="container" style="text-align: center;">
-            <div class="section-label">Python API</div>
-            <h2 class="section-title">Get Started in Minutes</h2>
-            <p class="section-desc" style="margin: 0 auto;">Simple integration into your projects.</p>
-
-            <div class="code-block" style="text-align: left;">
-                <div class="code-header">
-                    <span class="code-dot red"></span>
-                    <span class="code-dot yellow"></span>
-                    <span class="code-dot green"></span>
-                    <span style="margin-left: 1rem; font-family: 'Space Mono'; font-size: 0.85rem; color: var(--text-dim);">example.py</span>
-                </div>
-                <div class="code-content">
-                    <pre><span class="keyword">from</span> src <span class="keyword">import</span> ZuesHammer
-<span class="keyword">from</span> src.core.config <span class="keyword">import</span> Config
-
-config = Config.from_default_locations()
-config.permission_level = <span class="string">"semi_open"</span>
-config.voice_enabled = <span class="variable">True</span>
-
-agent = ZuesHammer(config)
-
-<span class="keyword">async def</span> <span class="function">main</span>():
-    <span class="keyword">await</span> agent.start()
-    
-    <span class="comment"># Voice input or text</span>
-    response = <span class="keyword">await</span> agent.process(<span class="string">"Hello, help me analyze this project"</span>)
-    <span class="keyword">print</span>(response)
-    
-    <span class="keyword">await</span> agent.stop()
-
-main()</pre>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="start-section">
+    <section id="start" class="start-section">
         <div class="container" style="text-align: center;">
             <div class="section-label">Quick Start</div>
             <h2 class="section-title">Get Up and Running</h2>
+            <p class="section-desc" style="margin: 0 auto 3rem;">Follow these steps to set up ZuesHammer in minutes.</p>
 
             <div class="start-steps">
                 <div class="start-card">
                     <div class="start-num">1</div>
                     <h3>Clone</h3>
-                    <p>Download the repository</p>
+                    <p>Download from GitHub</p>
                     <pre>git clone https://github.com/pengrambo3-tech/zueshammer.git
 cd zueshammer</pre>
                 </div>
+
                 <div class="start-card">
                     <div class="start-num">2</div>
                     <h3>Configure</h3>
                     <p>Set up your API key</p>
-                    <pre># Recommended: ChinaWhapi (all Chinese LLMs)
+                    <pre># ChinaWhapi (recommended)
 echo "OPENAI_API_KEY=your_key" >> ~/.zueshammer/.env
 echo "API_BASE=https://api.chinawhapi.com/v1" >> ~/.zueshammer/.env
 echo "MODEL=deepseek-chat" >> ~/.zueshammer/.env</pre>
                 </div>
+
                 <div class="start-card">
                     <div class="start-num">3</div>
                     <h3>Install</h3>
@@ -968,11 +427,12 @@ echo "MODEL=deepseek-chat" >> ~/.zueshammer/.env</pre>
 # Or with pip
 pip install -r requirements.txt</pre>
                 </div>
+
                 <div class="start-card">
                     <div class="start-num">4</div>
                     <h3>Run</h3>
                     <p>Start the agent</p>
-                    <pre># Voice mode (recommended!)
+                    <pre># Voice mode (recommended)
 python3 -m src.main --mode voice
 
 # Or CLI mode
@@ -982,31 +442,20 @@ python3 -m src.main --mode cli</pre>
         </div>
     </section>
 
+    <section id="install" class="install-section">
+        <div class="container">
+            <div class="install-box">
+                <h2>One-Line Install</h2>
+                <p class="desc">Run this command to install ZuesHammer with all dependencies:</p>
+                <div class="install-cmd">
+                    <span class="prompt">$</span> <span class="cmd">curl -sSL https://raw.githubusercontent.com/pengrambo3-tech/zueshammer/master/install.sh | bash</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <footer>
-        <div class="footer-content">
-            <div class="footer-brand">
-                <h3>ZuesHammer</h3>
-                <p>The AI Agent with Local Brain & Voice. Think locally, speak freely, remember everything.</p>
-            </div>
-            <div class="footer-links">
-                <h4>Resources</h4>
-                <ul>
-                    <li><a href="https://github.com/pengrambo3-tech/zueshammer">GitHub</a></li>
-                    <li><a href="https://github.com/pengrambo3-tech/zueshammer/blob/master/README.md">Documentation</a></li>
-                    <li><a href="https://github.com/pengrambo3-tech/zueshammer/issues">Issues</a></li>
-                </ul>
-            </div>
-            <div class="footer-links">
-                <h4>Project</h4>
-                <ul>
-                    <li><a href="https://github.com/pengrambo3-tech/zueshammer/blob/master/LICENSE">License (MIT)</a></li>
-                    <li><a href="https://github.com/pengrambo3-tech/zueshammer/releases">Changelog</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>© 2024 ZuesHammer. MIT License. Built with ❤️</p>
-        </div>
+        <p>2024 ZuesHammer. MIT License. Built with love.</p>
     </footer>
 </body>
 </html>
