@@ -102,8 +102,9 @@ Complete voice pipeline running locally:
 |-----------|-----------|---------|
 | Speech-to-Text | **Whisper** (local) | Offline capable, no data sent |
 | Text-to-Speech | **Edge TTS** | Natural, free voices |
-| Wake Word | Custom detector | "Hey Agent" activation |
-| Language Detection | Multi-language | Auto-detect Chinese/English |
+| Wake Word | Custom detector | "Zues" or "宙斯" activation |
+| Language Detection | Auto-detection | Auto-switch Chinese/English |
+| Smart Responses | Context-aware | Reply based on model/memory status |
 
 ```bash
 # Voice mode examples

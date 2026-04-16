@@ -36,7 +36,7 @@ class VoiceFirstInterface:
     语音优先接口 - ZuesHammer核心创新
     
     特性:
-    1. 唤醒词检测 (Hey Zues)
+    1. 唤醒词检测 (Zues/宙斯)
     2. 实时语音识别 (Whisper)
     3. 语音合成回复 (TTS)
     4. 多轮对话打断

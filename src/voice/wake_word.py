@@ -57,7 +57,7 @@ class WakeWordDetector:
         sample_rate: int = 16000,
         chunk_size: int = 1024,
     ):
-        self.wake_words = wake_words or ["宙斯", "zues", "zueshammer", "hey", "ok"]
+        self.wake_words = wake_words or ["宙斯", "zues"]
         self.sample_rate = sample_rate
         self.chunk_size = chunk_size
 
@@ -531,11 +531,22 @@ class VoiceManager:
                             if text:
                                 logger.info(f"User said: {text}")
 
+                                # 检测用户语言
+                                user_language = self._detect_language(text)
+                                logger.info(f"Detected user language: {user_language}")
+
                                 # 处理用户输入
                                 response = await agent.process(text)
 
+                                # 确定回复语言
+                                response_language = user_language if user_language == "zh" else "en"
+
+                                # 特殊回复处理：无模型/无记忆时
+                                if not response or response.startswith("Error"):
+                                    response = self._handle_no_model_memory(agent, user_language)
+
                                 # 语音合成并播放
-                                audio = await self.interaction.text_to_speech(response)
+                                audio = await self.interaction.text_to_speech(response, language=response_language)
                                 if audio:
                                     await self._play_audio(audio)
 
@@ -606,6 +617,57 @@ class VoiceManager:
         """响应回调"""
         logger.info(f"Response: {text}")
 
+    def _detect_language(self, text: str) -> str:
+        """
+        检测文本语言
+        
+        通过中文字符数量比例来判断
+        """
+        if not text:
+            return "en"
+        
+        chinese_chars = 0
+        total_chars = 0
+        
+        for char in text:
+            if '\u4e00' <= char <= '\u9fff':  # 中文字符范围
+                chinese_chars += 1
+            if char.isalpha():
+                total_chars += 1
+        
+        if total_chars > 0 and chinese_chars / total_chars > 0.3:
+            return "zh"
+        return "en"
+
+    def _handle_no_model_memory(self, agent, language: str) -> str:
+        """
+        处理无模型或无记忆的情况
+        
+        Args:
+            agent: ZuesHammer智能体
+            language: 用户语言
+            
+        Returns:
+            合适的回复文本
+        """
+        has_model = self._check_llm_available(agent)
+        has_memory = self._check_memory_available(agent)
+        
+        if language == "zh":
+            if not has_model and not has_memory:
+                return "抱歉，我目前没有记忆，请给我配置模型进行学习。"
+            elif not has_model:
+                return "抱歉，大模型暂时不可用，但我可以使用记忆库来帮助你。"
+            else:
+                return "抱歉，遇到了一些问题，请稍后再试。"
+        else:
+            if not has_model and not has_memory:
+                return "I currently don't have any memories. Please configure a language model so I can learn and assist you better."
+            elif not has_model:
+                return "Sorry, the language model is currently unavailable, but I can use my memory to help you."
+            else:
+                return "Sorry, I encountered an issue. Please try again later."
+
     async def _play_audio(self, audio_data: bytes):
         """播放音频"""
         try:
@@ -643,27 +705,140 @@ class VoiceManager:
             logger.error(f"Audio playback failed: {e}")
 
     async def _introduction(self, agent):
-        """自我介绍"""
-        intro = """你好！我是ZuesHammer，宙斯之锤。
-
-我的核心能力包括：
-理解你的意图并匹配合适的技能。
-如果找不到技能，我会调用大模型来工作。
-每次工作完成后，我会学习新的技能。
-下次遇到类似的问题，我就能直接回答了。
-
-你可以直接用语音和我对话，唤醒词是"宙斯"。
-
-有什么我可以帮你的吗？"""
-
-        logger.info("Introduction text generated")
-
-        # 语音合成
-        audio = await self.interaction.text_to_speech(intro)
-
+        """
+        自我介绍 - 中英双语
+        
+        根据是否有模型和记忆来决定自我介绍内容
+        """
+        # 检查模型和记忆状态
+        has_model = self._check_llm_available(agent)
+        has_memory = self._check_memory_available(agent)
+        
+        # 生成自我介绍（英文为主，如果检测到中文用户则切换）
+        intro = self._generate_introduction(has_model, has_memory)
+        
+        logger.info(f"Introduction generated (model={has_model}, memory={has_memory})")
+        
+        # 语音合成（默认英文）
+        audio = await self.interaction.text_to_speech(intro, language="en")
+        
         if audio:
             await self._play_audio(audio)
             logger.info("Introduction played")
+        
+        return intro
+
+    def _check_llm_available(self, agent) -> bool:
+        """检查大模型是否可用"""
+        try:
+            if hasattr(agent, 'llm') and agent.llm:
+                api_key = getattr(agent.llm, 'api_key', None)
+                return api_key is not None and api_key != ""
+            return False
+        except Exception:
+            return False
+
+    def _check_memory_available(self, agent) -> bool:
+        """检查记忆系统是否有数据"""
+        try:
+            if hasattr(agent, 'memory') and agent.memory:
+                # 检查短期和长期记忆
+                short_keys = self.interaction.voice_memory.memory.short_term.keys()
+                long_stats = self.interaction.voice_memory.memory.long_term.get_stats()
+                total_memories = long_stats.get('total_memories', 0)
+                return len(short_keys) > 0 or total_memories > 0
+            return False
+        except Exception:
+            return False
+
+    def _generate_introduction(self, has_model: bool, has_memory: bool) -> str:
+        """
+        生成自我介绍内容（英文为主）
+        
+        逻辑：
+        - 有模型 + 有记忆：完整自我介绍
+        - 有模型 + 无记忆：提示配置
+        - 无模型 + 有记忆：使用记忆库回复
+        - 无模型 + 无记忆：提示配置模型
+        """
+        if has_model and has_memory:
+            return (
+                "Hello! I am Zues, your AI super assistant. "
+                "I can understand your intentions and match them with the right skills. "
+                "If I don't have a matching skill, I will use my memory to help you. "
+                "If needed, I will call the large language model to work for you. "
+                "After completing a task, I will learn and store the new skill. "
+                "Next time you ask a similar question, I can answer directly! "
+                "You can talk to me by voice. Just say ZUES or ZHE SI to wake me up. "
+                "What can I help you with today?"
+            )
+        elif has_model and not has_memory:
+            return (
+                "Hello! I am Zues, your AI super assistant. "
+                "I am ready to help you. "
+                "I can call the large language model to assist you with any task. "
+                "After we work together, I will learn and remember your preferences. "
+                "You can talk to me by voice. Just say ZUES or ZHE SI to wake me up. "
+                "What can I help you with today?"
+            )
+        elif not has_model and has_memory:
+            return (
+                "Hello! I am Zues, your AI super assistant. "
+                "I currently don't have access to the language model, but I have memories from our previous conversations. "
+                "I can use my memory to help you with tasks. "
+                "You can talk to me by voice. Just say ZUES or ZHE SI to wake me up. "
+                "What can I help you with today?"
+            )
+        else:
+            # 无模型 + 无记忆
+            return (
+                "Hello! I am Zues, your AI super assistant. "
+                "I currently don't have any memories. "
+                "Please configure a language model so I can learn and assist you better. "
+                "You can talk to me by voice. Just say ZUES or ZHE SI to wake me up. "
+                "What can I help you with?"
+            )
+
+    def _generate_introduction_chinese(self, has_model: bool, has_memory: bool) -> str:
+        """
+        生成中文自我介绍（用于中文用户）
+        """
+        if has_model and has_memory:
+            return (
+                "你好！我是宙斯，你的超级助手。"
+                "我可以理解你的意图并匹配合适的技能。"
+                "如果找不到技能，我会使用记忆库来帮助你。"
+                "必要时，我会调用大模型来工作。"
+                "完成工作后，我会学习并存储新的技能。"
+                "下次你问类似的问题，我可以直接回答！"
+                "你可以用语音和我对话，只需说"宙斯"或"ZUES"来唤醒我。"
+                "有什么我可以帮你的吗？"
+            )
+        elif has_model and not has_memory:
+            return (
+                "你好！我是宙斯，你的超级助手。"
+                "我已经准备好帮助你。"
+                "我可以调用大模型来协助你完成任何任务。"
+                "我们一起工作后，我会学习和记住你的偏好。"
+                "你可以用语音和我对话，只需说"宙斯"或"ZUES"来唤醒我。"
+                "有什么我可以帮你的吗？"
+            )
+        elif not has_model and has_memory:
+            return (
+                "你好！我是宙斯，你的超级助手。"
+                "我目前无法访问大模型，但我有我们之前对话的记忆。"
+                "我可以使用记忆库来帮助你完成任务。"
+                "你可以用语音和我对话，只需说"宙斯"或"ZUES"来唤醒我。"
+                "有什么我可以帮你的吗？"
+            )
+        else:
+            # 无模型 + 无记忆
+            return (
+                "你好！我是宙斯，你的超级助手。"
+                "我目前没有记忆，请给我配置模型进行学习。"
+                "你可以用语音和我对话，只需说"宙斯"或"ZUES"来唤醒我。"
+                "有什么我可以帮你的吗？"
+            )
 
     def _get_voice_config(self) -> Dict:
         """获取语音配置"""
